@@ -79,6 +79,13 @@ public class MyActivity extends Activity {
         //IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         //filter.addAction(BluetoothDevice.ACTION_UUID);
         //registerReceiver(ActionFoundReceiver, filter); // Don't forget to unregister during onDestroy
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                handleStartClick(null);
+            }
+        }, 5000);
     }
 
     @Override
@@ -116,15 +123,17 @@ public class MyActivity extends Activity {
 
     //TODO currently scan yields rapid repeats of same device when found
     private ScanCallback scanCallback = new ScanCallback() {
+
         @Override
-        public void onAdvertisementUpdate(ScanResult scanResult) {
+        public void onScanResult(int callbackType, ScanResult scanResult) {
             BluetoothDevice device = scanResult.getDevice();
             if(foundDevices.contains(device.getAddress())) return;
             foundDevices.add(device.getAddress());
             String deviceInfo = device.getName() + " - " + device.getAddress();
             Log.d(TAG, "Device: " + deviceInfo + " Scanned!");
             //TODO use ScanRecord to retrieve more data
-            ScanRecord scanRecord = ScanRecord.parseFromBytes(scanResult.getScanRecord());
+
+            ScanRecord scanRecord = scanResult.getScanRecord();
             List<ParcelUuid> uuids = scanRecord.getServiceUuids();
 
             if(uuids != null) {
@@ -194,17 +203,23 @@ public class MyActivity extends Activity {
     };*/
 
     private AdvertiseCallback advertiseCallback = new AdvertiseCallback() {
+
         @Override
-        public void onSuccess(AdvertiseSettings advertiseSettings) {
+        public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+            super.onStartSuccess(settingsInEffect);
+
             String successMsg = "Advertisement command attempt successful";
             Log.d(TAG, successMsg);
         }
 
         @Override
-        public void onFailure(int i) {
-            String failMsg = "Advertisement command attempt failed: " + i;
+        public void onStartFailure(int errorCode) {
+            super.onStartFailure(errorCode);
+
+            String failMsg = "Advertisement command attempt failed: " + errorCode;
             Log.e(TAG, failMsg);
         }
+
     };
 
     private void addServiceToGattServer() {
