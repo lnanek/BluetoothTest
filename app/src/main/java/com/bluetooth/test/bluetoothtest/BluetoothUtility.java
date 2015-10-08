@@ -46,10 +46,10 @@ public class BluetoothUtility {
     Activity activity;
     private BluetoothManager bluetoothManager;
     private BluetoothAdapter bluetoothAdapter;
-    private BluetoothLeAdvertiser bluetoothLeAdvertiser;
+    //private BluetoothLeAdvertiser bluetoothLeAdvertiser;
     private BluetoothGattServer gattServer;
     private ArrayList<BluetoothGattService> advertisingServices;
-    private BluetoothLeScanner bluetoothLeScanner;
+    //private BluetoothLeScanner bluetoothLeScanner;
 
     /**
      * Scanning Objects
@@ -65,15 +65,15 @@ public class BluetoothUtility {
         bluetoothManager = (BluetoothManager) activity.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         bluetoothAdapter = bluetoothManager.getAdapter();
         bluetoothAdapter.setName(BLUETOOTH_ADAPTER_NAME);
-        bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
-        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        //bluetoothLeAdvertiser = bluetoothAdapter.getBluetoothLeAdvertiser();
+        //bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         advertisingServices = new ArrayList<BluetoothGattService>();
         serviceUuids = new ArrayList<ParcelUuid>();
     }
 
     public void cleanUp() {
         if(getAdvertising()) stopAdvertise();
-        if(getScanning()) stopBleScan();
+        //if(getScanning()) stopBleScan();
         if(gattServer != null) gattServer.close();
     }
 
@@ -111,8 +111,8 @@ public class BluetoothUtility {
 
         startGattServer();
 
-        AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
-        AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
+        //AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder();
+        //AdvertiseSettings.Builder settingsBuilder = new AdvertiseSettings.Builder();
 
         //UUID uuid = UUID.randomUUID();
         //ParcelUuid pUUID = new ParcelUuid(uuid); //test random uuid
@@ -123,28 +123,28 @@ public class BluetoothUtility {
 
         //Log.d(TAG, "Generated UUID: " + uuid.toString());
 
-        dataBuilder.setIncludeTxPowerLevel(false); //necessity to fit in 31 byte advertisement
+        //dataBuilder.setIncludeTxPowerLevel(false); //necessity to fit in 31 byte advertisement
 
         //dataBuilder.setManufacturerData(0, advertisingBytes);
 
-        dataBuilder.addServiceUuid(serviceUuids.get(0));
+        //dataBuilder.addServiceUuid(serviceUuids.get(0));
 
         //dataBuilder.setServiceUuids(serviceUuids);
         //dataBuilder.setServiceData(pUUID, new byte[]{});
 
-        settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
-        settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
+        //settingsBuilder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED);
+        //settingsBuilder.setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH);
         //settingsBuilder.setType(AdvertiseSettings.ADVERTISE_TYPE_CONNECTABLE);
-        settingsBuilder.setConnectable(true);
+        //settingsBuilder.setConnectable(true);
 
-        bluetoothLeAdvertiser.startAdvertising(settingsBuilder.build(), dataBuilder.build(), advertiseCallback);
+        //bluetoothLeAdvertiser.startAdvertising(settingsBuilder.build(), dataBuilder.build(), advertiseCallback);
         advertising = true;
     }
 
     //Stop ble advertising and clean up
     public void stopAdvertise() {
         if(!getAdvertising()) return;
-        bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
+        //bluetoothLeAdvertiser.stopAdvertising(advertiseCallback);
         gattServer.clearServices();
         gattServer.close();
         advertisingServices.clear();
@@ -179,26 +179,4 @@ public class BluetoothUtility {
         scanCallback = callback;
     }
 
-    /**
-     * BLE Scanning
-     */
-    public void startBleScan() {
-        if(getScanning()) return;
-        enableBluetooth();
-        scanning = true;
-        ScanFilter.Builder filterBuilder = new ScanFilter.Builder(); //TODO currently default, scans all devices
-        ScanSettings.Builder settingsBuilder = new ScanSettings.Builder();
-        List<ScanFilter> filters = new ArrayList<ScanFilter>();
-        filters.add(filterBuilder.build());
-        bluetoothLeScanner.startScan(filters, settingsBuilder.build(), scanCallback);
-
-        Log.d(TAG, "Bluetooth is currently scanning...");
-    }
-
-    public void stopBleScan() {
-        if(!getScanning()) return;
-        scanning = false;
-        bluetoothLeScanner.stopScan(scanCallback);
-        Log.d(TAG, "Scanning has been stopped");
-    }
 }
